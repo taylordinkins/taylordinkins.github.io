@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jane Doe — Research Scientist</title>
+  <meta name="description" content="Jane Doe, research scientist working on [your field]. Publications, CV, and contact information.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfdfb;
+      --text: #1f2328;
+      --muted: #5f6670;
+      --accent: #1f4e79;
+      --rule: #e4e4e0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16181c;
+        --text: #e6e6e3;
+        --muted: #9aa0a8;
+        --accent: #7fb0e0;
+        --rule: #2c2f35;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 72px 20px 48px;
+    }
+    h1, h2 {
+      font-family: "Source Serif 4", Georgia, serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    h1 { font-size: 2.3rem; margin: 0 0 6px; }
+    h2 {
+      font-size: 1.3rem;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Header */
+    header { display: flex; gap: 28px; align-items: center; }
+    .photo {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .role { color: var(--muted); margin: 0; }
+    .links {
+      display: flex; flex-wrap: wrap; gap: 6px 18px;
+      margin-top: 14px;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    @media (max-width: 560px) {
+      header { flex-direction: column; align-items: flex-start; gap: 18px; }
+      main { padding-top: 40px; }
+    }
+
+    /* Publications */
+    .pubs { list-style: none; padding: 0; margin: 0; }
+    .pubs li { margin-bottom: 22px; }
+    .pub-title { font-weight: 500; }
+    .pub-authors, .pub-venue { color: var(--muted); font-size: 0.93rem; }
+    .pub-authors .me { color: var(--text); font-weight: 500; }
+    .pub-venue em { font-style: italic; }
+    .pub-links { font-size: 0.88rem; margin-top: 2px; }
+    .pub-links a { margin-right: 12px; }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 16px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+
+    <header>
+      <!-- Optional: put a square headshot named photo.jpg in the repo. Delete this line if you don't want a photo. -->
+      <img class="photo" src="photo.jpg" alt="Photo of Jane Doe">
+      <div>
+        <h1>Jane Doe</h1>
+        <p class="role">Postdoctoral Researcher · University Name</p>
+        <nav class="links">
+          <a href="mailto:jane@example.com">Email</a>
+          <a href="cv.pdf">CV</a>
+          <a href="https://github.com/YOUR-USERNAME">GitHub</a>
+          <a href="https://scholar.google.com/citations?user=YOUR-ID">Google Scholar</a>
+          <a href="https://orcid.org/0000-0000-0000-0000">ORCID</a>
+        </nav>
+      </div>
+    </header>
+
+    <section>
+      <h2>About</h2>
+      <p>
+        I am a research scientist working on [your field / core question]. My research
+        focuses on [one or two specific themes], using [methods or approaches].
+        I received my PhD in [field] from [university] in [year], advised by [advisor].
+      </p>
+      <p>
+        I'm currently interested in [a forward-looking sentence about what you want to work on next].
+      </p>
+    </section>
+
+    <section>
+      <h2>Publications</h2>
+      <ul class="pubs">
+        <li>
+          <div class="pub-title"><a href="https://doi.org/xx.xxxx/xxxxx">Title of your most recent paper goes here</a></div>
+          <div class="pub-authors"><span class="me">J. Doe</span>, A. Coauthor, B. Advisor</div>
+          <div class="pub-venue"><em>Journal or Conference Name</em>, 2026</div>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/xxxx.xxxxx">arXiv</a>
+            <a href="https://github.com/YOUR-USERNAME/repo">Code</a>
+          </div>
+        </li>
+        <li>
+          <div class="pub-title"><a href="https://doi.org/xx.xxxx/xxxxx">Title of an earlier paper</a></div>
+          <div class="pub-authors">A. Coauthor, <span class="me">J. Doe</span>, B. Advisor</div>
+          <div class="pub-venue"><em>Journal Name</em>, 2025</div>
+          <div class="pub-links">
+            <a href="papers/paper2.pdf">PDF</a>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <footer>
+      Last updated October 2026
+    </footer>
+
+  </main>
+</body>
+</html>
