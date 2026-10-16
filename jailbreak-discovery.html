@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Label-efficient jailbreak discovery — Taylor Dinkins</title>
+  <meta name="description" content="Ongoing research by Taylor Dinkins: finding jailbreak attempts in LLM traffic from model activations with a small analyst labeling budget.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfdfb;
+      --text: #1f2328;
+      --muted: #5f6670;
+      --accent: #1f4e79;
+      --rule: #e4e4e0;
+      --callout: #f2f5f8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16181c;
+        --text: #e6e6e3;
+        --muted: #9aa0a8;
+        --accent: #7fb0e0;
+        --rule: #2c2f35;
+        --callout: #1e2228;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 56px 20px 48px;
+    }
+    h1, h2 {
+      font-family: "Source Serif 4", Georgia, serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    h1 { font-size: 2rem; margin: 18px 0 8px; }
+    h2 {
+      font-size: 1.3rem;
+      margin: 44px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { font-size: 0.92rem; font-weight: 500; }
+    .meta { color: var(--muted); margin: 0; font-size: 0.95rem; }
+    .lede { font-size: 1.06rem; margin-top: 22px; }
+    ul.findings { padding-left: 1.2em; }
+    ul.findings li { margin-bottom: 12px; }
+    .status {
+      background: var(--callout);
+      border-left: 3px solid var(--accent);
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    figure { margin: 32px 0 0; }
+    figure img { display: block; width: 100%; height: auto; }
+    figcaption { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+    .status p { margin: 0; }
+    .status p + p { margin-top: 8px; }
+    footer {
+      margin-top: 64px;
+      padding-top: 16px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+
+    <a class="back" href="./">&larr; Taylor Dinkins</a>
+    <h1>Finding jailbreak attempts with a small labeling budget</h1>
+    <p class="meta">Ongoing research &middot; preliminary results &middot; October 2026</p>
+
+    <p class="lede">
+      A primary motivation in my Ph.D. work on interactive anomaly detection was that statistical
+      outliers don't always match what an expert actually cares about. This project looks at a
+      setting where that mismatch is important: finding jailbreak attempts in LLM traffic when an
+      analyst only has time to review a few dozen prompts.
+    </p>
+
+    <section>
+      <p>
+        Most unusual prompts aren't attacks. A request for a sonnet about tax law looks very different
+        from typical traffic, and so does a role-play setup that asks the model to ignore its
+        guidelines. Only the second one is a problem. A detector that flags whatever looks rare will
+        spend its labels on prompts like the first, and with a small budget it may never show the
+        analyst an attack at all. Furthermore, a detector may not actually learn to separate out novel benign
+        prompts from harmful ones that "look safe", especially if it hasn't queried any harmful ones.
+      </p>
+      <p>
+        So the question I'm working on is two-fold: how to choose which prompts to label and how to incorporate those labels 
+        so that a detector learns what attacks look like rather than what rare
+        prompts look like.
+      </p>
+      <div class="status">
+        <p>
+          This post is intentionally vague on details of the early work, as we've seen what happens when research is co-opted by 
+          large language models for being publicly available too early (see: OpenAI's pure math takeover).
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Setup</h2>
+      <p>
+        I hide a small fraction of jailbreak attempts in pools of thousands of mostly ordinary prompts
+        and give each method the same budget of 50 labels from a simulated analyst. Each detector
+        reads an open-weight LLM's internal activations for every prompt, before the model responds.
+        I then score it on a separate held-out set that includes attack types and benign topics it
+        never saw during labeling.
+      </p>
+    </section>
+
+    <section>
+      <h2>Results so far</h2>
+      <p>
+        The first thing to check is whether a method puts attacks in front of the analyst at all.
+        Much work in active anomaly detection and interactive human-in-the-loop methods relies heavily
+        on the first detected anomaly to learn how to separate out benign (or nominal) data.
+        The novelty-based detectors, including PMA from my
+        <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
+        zero attacks in every run. They spent the whole budget on unusual looking benign prompts. 
+        My in development approach found about twice as many attacks as active
+        anomaly discovery, the strongest baseline here.
+      </p>
+
+      <figure>
+        <picture>
+          <source srcset="img/jb-found-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="img/jb-found-light.png" width="1360" height="780"
+               alt="Line chart of attacks found while labeling, from 0 to 50 labels. My approach reaches about 12 attacks, active anomaly discovery about 6, random labeling about 1, and novelty-based detectors 0.">
+        </picture>
+        <figcaption>Attacks found among the prompts sent to the analyst.</figcaption>
+      </figure>
+
+      <p>
+        Those labels are what the detector learns from, so finding attacks early carries over to the
+        held-out set. After 50 labels, my approach reaches an AUPRC of 0.41, against 0.23&ndash;0.24
+        for active anomaly discovery and for a detector trained on randomly chosen labels, and 0.14
+        for a recent detector built on sparse-autoencoder features.
+      </p>
+
+      <figure>
+        <picture>
+          <source srcset="img/jb-auprc-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="img/jb-auprc-light.png" width="1360" height="780"
+               alt="Line chart of held-out AUPRC from 0 to 50 labels. At 50 labels: my approach 0.41, random labeling 0.24, active anomaly discovery 0.23, SAE-based detector 0.14, novelty-based detectors 0.05.">
+        </picture>
+        <figcaption>
+          AUPRC on held-out prompts. Both charts average three data pools with five seeds each. The
+          two novelty-based detectors give the same results and share a line.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Caveats</h2>
+      <p>
+        The gain currently isn't uniform. On one of the three pools, random labeling and active anomaly
+        discovery both beat this approach, which is under investigation. False alarms also cut both ways:
+        on new benign topics my approach flags about 3% of prompts, compared with about 10% for the
+        distance-based detectors, but it flags about 7% of benign prompts that are phrased like
+        attacks, where those detectors flag almost none.
+      </p>
+      <p>
+        I'm now building a broader evaluation with lower attack rates, more realistic traffic and
+        attack types that look less like anything seen during labeling, ahead of a presumed workshop paper once the methodology and evaluations are fully-fledged out.
+      </p>
+    </section>
+
+    <div class="status">
+      <p>
+        These results are preliminary and come from my own benchmark. Code and more details are (potentially) available
+        on request: <a href="mailto:txdinkins@gmail.com">txdinkins@gmail.com</a>.
+      </p>
+    </div>
+
+    <footer>
+      Last updated October 2026
+    </footer>
+
+  </main>
+</body>
+</html>
