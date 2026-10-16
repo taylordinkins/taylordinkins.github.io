@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jane Doe — Research Scientist</title>
-  <meta name="description" content="Jane Doe, research scientist working on [your field]. Publications, CV, and contact information.">
+  <title>Taylor Dinkins — Machine Learning Researcher</title>
+  <meta name="description" content="Taylor Dinkins, Ph.D. in Computer Science (Oregon State University). Machine learning research in anomaly detection, forecasting, AI safety, and climate applications.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -15,6 +15,7 @@
       --muted: #5f6670;
       --accent: #1f4e79;
       --rule: #e4e4e0;
+      --callout: #f2f5f8;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -23,6 +24,7 @@
         --muted: #9aa0a8;
         --accent: #7fb0e0;
         --rule: #2c2f35;
+        --callout: #1e2228;
       }
     }
     * { box-sizing: border-box; }
@@ -39,7 +41,7 @@
       margin: 0 auto;
       padding: 72px 20px 48px;
     }
-    h1, h2 {
+    h1, h2, h3 {
       font-family: "Source Serif 4", Georgia, serif;
       font-weight: 600;
       line-height: 1.2;
@@ -50,6 +52,15 @@
       margin: 48px 0 16px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--rule);
+    }
+    h3 {
+      font-size: 0.8rem;
+      font-family: "Inter", sans-serif;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 28px 0 14px;
     }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -74,6 +85,16 @@
       main { padding-top: 40px; }
     }
 
+    /* Seeking callout */
+    .seeking {
+      background: var(--callout);
+      border-left: 3px solid var(--accent);
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
+    .seeking p { margin: 0; }
+
     /* Publications */
     .pubs { list-style: none; padding: 0; margin: 0; }
     .pubs li { margin-bottom: 22px; }
@@ -97,17 +118,15 @@
   <main>
 
     <header>
-      <!-- Optional: put a square headshot named photo.jpg in the repo. Delete this line if you don't want a photo. -->
-      <img class="photo" src="photo.jpg" alt="Photo of Jane Doe">
+      <img class="photo" src="photo.jpg" alt="Photo of Taylor Dinkins">
       <div>
-        <h1>Jane Doe</h1>
-        <p class="role">Postdoctoral Researcher · University Name</p>
+        <h1>Taylor Dinkins</h1>
+        <p class="role">Independent Researcher · Ph.D. Computer Science, Oregon State University</p>
         <nav class="links">
-          <a href="mailto:jane@example.com">Email</a>
+          <a href="mailto:txdinkins@gmail.com">Email</a>
           <a href="cv.pdf">CV</a>
-          <a href="https://github.com/YOUR-USERNAME">GitHub</a>
-          <a href="https://scholar.google.com/citations?user=YOUR-ID">Google Scholar</a>
           <a href="resume.pdf">Resume</a>
+          <a href="https://github.com/taylordinkins">GitHub</a>
         </nav>
       </div>
     </header>
@@ -115,34 +134,60 @@
     <section>
       <h2>About</h2>
       <p>
-        I am a research scientist working on [your field / core question]. My research
-        focuses on [one or two specific themes], using [methods or approaches].
-        I received my PhD in [field] from [university] in [year], advised by [advisor].
+        I recently completed my Ph.D. in Computer Science at Oregon State University, advised by
+        Weng-Keen Wong, specializing in anomaly
+        detection and machine learning. My first-author publications cover detecting anomalies in
+        high-dimensional data, incorporating limited feedback into anomaly detection models, and
+        evaluating spatial generalization in forecasting.
       </p>
       <p>
-        I'm currently interested in [a forward-looking sentence about what you want to work on next].
+        My research focuses on machine learning methods for detecting and forecasting anomalies and
+        events, with an emphasis on real-world usability. I'm currently extending this work as an
+        independent researcher, developing label-efficient feedback methods for detecting jailbreak
+        attempts on large language models.
       </p>
+      <div class="seeking">
+        <p>
+          <strong>Currently seeking</strong> research positions in humanitarian domains, primarily
+          AI safety or climate modeling for climate change resilience, where I can apply detection
+          and forecasting methods to high-impact problems.
+        </p>
+      </div>
     </section>
 
     <section>
       <h2>Publications</h2>
+
+      <h3>Peer-reviewed</h3>
       <ul class="pubs">
         <li>
-          <div class="pub-title"><a href="https://doi.org/xx.xxxx/xxxxx">Title of your most recent paper goes here</a></div>
-          <div class="pub-authors"><span class="me">J. Doe</span>, A. Coauthor, B. Advisor</div>
-          <div class="pub-venue"><em>Journal or Conference Name</em>, 2026</div>
-          <div class="pub-links">
-            <a href="https://arxiv.org/abs/xxxx.xxxxx">arXiv</a>
-            <a href="https://github.com/YOUR-USERNAME/repo">Code</a>
-          </div>
+          <div class="pub-title"><a href="https://doi.org/10.1609/aaai.v40i47.41462">Localized near surface temperature inversion forecasting using long short-term memory</a></div>
+          <div class="pub-authors"><span class="me">T. Dinkins</span>, W.-K. Wong, B. Amogi, P. Pesantez-Cabrera, J. Patel, L. Khot, A. Fern</div>
+          <div class="pub-venue"><em>Innovative Applications of Artificial Intelligence (IAAI)</em>, 2026</div>
         </li>
         <li>
-          <div class="pub-title"><a href="https://doi.org/xx.xxxx/xxxxx">Title of an earlier paper</a></div>
-          <div class="pub-authors">A. Coauthor, <span class="me">J. Doe</span>, B. Advisor</div>
-          <div class="pub-venue"><em>Journal Name</em>, 2025</div>
-          <div class="pub-links">
-            <a href="papers/paper2.pdf">PDF</a>
-          </div>
+          <div class="pub-title">Incorporating interactive user feedback through precision matrix adjustments for high-dimensional anomaly detection</div>
+          <div class="pub-authors"><span class="me">T. Dinkins</span>, W.-K. Wong, H. Chen, Y. Liu, K. Ishikawa</div>
+          <div class="pub-venue"><em>IEEE International Conference on Data Mining (ICDM)</em>, 2025</div>
+        </li>
+        <li>
+          <div class="pub-title">Towards explainable precision changepoint detection through linear decomposition</div>
+          <div class="pub-authors"><span class="me">T. Dinkins</span>, S. Bhattacharyya, S. Chatterjee, S. Reis, W.-K. Wong</div>
+          <div class="pub-venue"><em>Anomaly and Novelty Detection, Explanation and Accommodation Workshop (ANDEA)</em>, 2022</div>
+        </li>
+      </ul>
+
+      <h3>Under review</h3>
+      <ul class="pubs">
+        <li>
+          <div class="pub-title">Improving spatial generalization with edge-gated spatiotemporal graph neural networks for temperature inversion forecasting</div>
+          <div class="pub-authors"><span class="me">T. Dinkins</span>, W.-K. Wong, B. Amogi, P. Pesantez-Cabrera, J. Patel, L. Khot, A. Fern</div>
+          <div class="pub-venue"><em>Innovative Applications of Artificial Intelligence (IAAI)</em>, 2027 — under review</div>
+        </li>
+        <li>
+          <div class="pub-title">Online precision matrix changepoint detection with localization to groups of dimensions</div>
+          <div class="pub-authors"><span class="me">T. Dinkins</span>, W.-K. Wong, S. Bhattacharyya, S. Chatterjee, G. Raffa</div>
+          <div class="pub-venue"><em>Data Mining and Knowledge Discovery (DMKD)</em> — post-revision review</div>
         </li>
       </ul>
     </section>
