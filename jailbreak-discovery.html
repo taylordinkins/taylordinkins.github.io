@@ -88,33 +88,27 @@
     <h1>Finding jailbreak attempts with a small labeling budget</h1>
     <p class="meta">Ongoing research &middot; preliminary results &middot; October 2026</p>
 
-    <p>
-      A primary motivation in my Ph.D. work on interactive anomaly detection was that statistical
+    <p class="lede">
+      A recurring issue in my Ph.D. work on interactive anomaly detection was that statistical
       outliers don't always match what an expert actually cares about. This project looks at a
-      setting where that mismatch is important: finding jailbreak attempts in LLM traffic when an
+      setting where that mismatch matters a lot: finding jailbreak attempts in LLM traffic when an
       analyst only has time to review a few dozen prompts.
     </p>
 
     <section>
+      <h2>Why novelty isn't enough</h2>
       <p>
         Most unusual prompts aren't attacks. A request for a sonnet about tax law looks very different
         from typical traffic, and so does a role-play setup that asks the model to ignore its
         guidelines. Only the second one is a problem. A detector that flags whatever looks rare will
         spend its labels on prompts like the first, and with a small budget it may never show the
-        analyst an attack at all. Furthermore, a detector may not actually learn to separate out novel benign
-        prompts from harmful ones that "look safe", especially if it hasn't queried any harmful ones.
+        analyst an attack at all.
       </p>
       <p>
-        So the question I'm working on is two-fold: how to choose which prompts to label and how to incorporate those labels 
-        so that a detector learns what attacks look like rather than what rare
+        So the question I'm working on is how to choose which prompts to label, so that a detector
+        reading the model's internal activations learns what attacks look like rather than what rare
         prompts look like.
       </p>
-      <div class="status">
-        <p>
-          This post is intentionally vague on details of the early work, as we've seen what happens when research is co-opted by 
-          large language models for being publicly available too early (see: OpenAI's pure math takeover).
-        </p>
-      </div>
     </section>
 
     <section>
@@ -132,12 +126,10 @@
       <h2>Results so far</h2>
       <p>
         The first thing to check is whether a method puts attacks in front of the analyst at all.
-        Much work in active anomaly detection and interactive human-in-the-loop methods relies heavily
-        on the first detected anomaly to learn how to separate out benign (or nominal) data.
         The novelty-based detectors, including PMA from my
         <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
-        zero attacks in every run. They spent the whole budget on unusual looking benign prompts. 
-        My in development approach found about twice as many attacks as active
+        zero attacks in every run. They spent the whole budget on unusual benign prompts, which is
+        exactly the failure described above. My approach found about twice as many attacks as active
         anomaly discovery, the strongest baseline here.
       </p>
 
@@ -152,7 +144,7 @@
 
       <p>
         Those labels are what the detector learns from, so finding attacks early carries over to the
-        held-out set. After 50 labels, my approach reaches an AUPRC of 0.41, against 0.23&ndash;0.24
+        held-out set. After 50 labels, my approach reaches an AUPRC of 0.40, against 0.23&ndash;0.24
         for active anomaly discovery and for a detector trained on randomly chosen labels, and 0.14
         for a recent detector built on sparse-autoencoder features.
       </p>
@@ -161,10 +153,10 @@
         <picture>
           <source srcset="img/jb-auprc-dark.png" media="(prefers-color-scheme: dark)">
           <img src="img/jb-auprc-light.png" width="1360" height="780"
-               alt="Line chart of held-out AUPRC from 0 to 50 labels. At 50 labels: my approach 0.41, random labeling 0.24, active anomaly discovery 0.23, SAE-based detector 0.14, novelty-based detectors 0.05.">
+               alt="Line chart of held-out AUPRC from 0 to 50 labels. At 50 labels: my approach 0.40, random labeling 0.24, active anomaly discovery 0.23, SAE-based detector 0.14, novelty-based detectors 0.05.">
         </picture>
         <figcaption>
-          AUPRC on held-out prompts. Both charts average three data pools with five seeds each. The
+          AUPRC on held-out prompts. Both charts average three data pools with five seeds each (one run per pool for the novelty-based detectors, which are deterministic). The
           two novelty-based detectors give the same results and share a line.
         </figcaption>
       </figure>
@@ -173,21 +165,21 @@
     <section>
       <h2>Caveats</h2>
       <p>
-        The gain currently isn't uniform. On one of the three pools, random labeling and active anomaly
-        discovery both beat this approach, which is under investigation. False alarms also cut both ways:
-        on new benign topics my approach flags about 3% of prompts, compared with about 10% for the
+        The gain isn't uniform. On one of the three pools, random labeling and active anomaly
+        discovery both beat my approach, and I'm still looking into why. False alarms also cut both ways:
+        on new benign topics my approach flags about 4% of prompts, compared with about 10% for the
         distance-based detectors, but it flags about 7% of benign prompts that are phrased like
         attacks, where those detectors flag almost none.
       </p>
       <p>
         I'm now building a broader evaluation with lower attack rates, more realistic traffic and
-        attack types that look less like anything seen during labeling, ahead of a presumed workshop paper once the methodology and evaluations are fully-fledged out.
+        attack types that look less like anything seen during labeling, ahead of a workshop paper.
       </p>
     </section>
 
     <div class="status">
       <p>
-        These results are preliminary and come from my own benchmark. Code and more details are (potentially) available
+        These results are preliminary and come from my own benchmark. Code and details are available
         on request: <a href="mailto:txdinkins@gmail.com">txdinkins@gmail.com</a>.
       </p>
     </div>
