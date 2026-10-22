@@ -96,29 +96,56 @@
     </p>
 
     <section>
-      <h2>Why novelty isn't enough</h2>
+      <h2>Novelty isn't malice</h2>
       <p>
-        Most unusual prompts aren't attacks. A request for a sonnet about tax law looks very different
-        from typical traffic, and so does a role-play setup that asks the model to ignore its
-        guidelines. Only the second one is a problem. A detector that flags whatever looks rare will
-        spend its labels on prompts like the first, and with a small budget it may never show the
-        analyst an attack at all.
+        The natural way to catch new attacks is to flag whatever looks unusual and have an analyst
+        check it. That assumes attacks are the unusual prompts. In realistic traffic they mostly
+        aren't.
       </p>
       <p>
-        So the question I'm working on is how to choose which prompts to label, so that a detector
-        reading the model's internal activations learns what attacks look like rather than what rare
-        prompts look like.
+        When I looked at the 50 prompts a standard novelty detector ranks as most unusual, about 45
+        were ordinary chat: requests where the user forgot to paste in the text they wanted edited,
+        pasted code and error logs, and the same template sent over and over. None were attacks.
+        The attacks didn't stand out at all: the typical one ranked near the middle of the benign
+        prompts, and at most 4% of any kind of attack made it into the top 5% a detector would
+        flag.
+      </p>
+
+      <figure>
+        <picture>
+          <source srcset="img/jb-novelty-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="img/jb-novelty-light.png" width="1360" height="720"
+               alt="Left: a grid of the 50 most unusual prompts in a pool, 45 everyday chat, 5 other benign prompts and 0 attacks. Right: the typical attack ranks at the 46th, 47th and 65th percentile of unusualness for three kinds of jailbreak, with 0.7%, 0% and 4% of each kind landing in the top 5%.">
+        </picture>
+        <figcaption>
+          Left: what a novelty detector ranks highest, averaged over three data pools (44&ndash;47
+          of the 50 were everyday chat in each). Right: where attacks rank by the same detector's
+          score, measured against the pool's benign prompts.
+        </figcaption>
+      </figure>
+
+      <p>
+        So a detector that flags whatever looks rare will spend its labels on prompts like these,
+        and with a small budget it may never show the analyst an attack at all. The question I'm
+        working on is how to choose which prompts to label, so that a detector reading the model's
+        internal activations learns what attacks look like rather than what rare prompts look like.
       </p>
     </section>
 
     <section>
       <h2>Setup</h2>
       <p>
-        I hide a small fraction of jailbreak attempts in pools of thousands of mostly ordinary prompts
-        and give each method the same budget of 50 labels from a simulated analyst. Each detector
-        reads an open-weight LLM's internal activations for every prompt, before the model responds.
-        I then score it on a separate held-out set that includes attack types and benign topics it
-        never saw during labeling.
+        I hide a small fraction of jailbreak attempts (2% in the results below) in pools of
+        thousands of mostly ordinary prompts, and give each method the same budget of 50 labels from
+        a simulated analyst. Each detector reads an open-weight LLM's internal activations for every
+        prompt, before the model responds. I then score it on a separate held-out set that includes
+        attack types and benign topics it never saw during labeling.
+      </p>
+      <p>
+        The approach I'm testing is deliberately simple: a small detector that learns from every
+        label, plus a rule for which prompt to show the analyst next. Neither piece is new on its
+        own; the labeling rule builds on established ideas from active learning. What I'm after is
+        when this works, why novelty-based methods fail where it succeeds, and how far it holds up.
       </p>
     </section>
 
@@ -129,7 +156,7 @@
         The novelty-based detectors, including PMA from my
         <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
         zero attacks in every run. They spent the whole budget on unusual benign prompts, which is
-        exactly the failure described above. My approach found about twice as many attacks as active
+        exactly the failure shown above. My approach found about twice as many attacks as active
         anomaly discovery, the strongest baseline here.
       </p>
 
@@ -166,14 +193,48 @@
       <h2>Caveats</h2>
       <p>
         The gain isn't uniform. On one of the three pools, random labeling and active anomaly
-        discovery both beat my approach, and I'm still looking into why. False alarms also cut both ways:
-        on new benign topics my approach flags about 4% of prompts, compared with about 10% for the
-        distance-based detectors, but it flags about 7% of benign prompts that are phrased like
-        attacks, where those detectors flag almost none.
+        discovery both beat my approach. About one run in six still finds no attack in its 50
+        labels, and at very low attack rates (1 in 200 prompts) discovery falls apart. The failure
+        of novelty is also specific to realistic traffic: in pools without everyday chat, PMA does
+        well and even comes out ahead of my approach.
       </p>
       <p>
-        I'm now building a broader evaluation with lower attack rates, more realistic traffic and
-        attack types that look less like anything seen during labeling, ahead of a workshop paper.
+        False alarms cut both ways. On new benign topics my approach flags about 4% of prompts,
+        compared with about 10% for the distance-based detectors, but it flags about 7% of benign
+        prompts that are phrased like attacks, where those detectors flag almost none. The detector
+        partly learns &ldquo;sounds adversarial,&rdquo; not just &ldquo;is harmful.&rdquo;
+      </p>
+      <p>
+        These numbers also come from a setting where the defender starts with no labeled examples.
+        A detector built from public labeled data is a strong starting point on its own, so I'm also
+        testing whether analyst feedback still adds on top of one.
+      </p>
+    </section>
+
+    <section>
+      <h2>What's next</h2>
+      <p>
+        I'm now running a much broader benchmark ahead of a workshop paper. Compared with the results
+        above, it uses ten fresh data pools and adds:
+      </p>
+      <ul class="findings">
+        <li>
+          attacks that look nothing like the ones above, including plain harmful requests with no
+          jailbreak wrapping, automatically optimized attacks, and real users' jailbreak attempts;
+        </li>
+        <li>
+          benign topics and later months of traffic held out, to test whether new benign
+          conversations get flagged as threats;
+        </li>
+        <li>
+          attack rates from 0.5% to 5%, and a check of whether the model actually answered each
+          attack it was sent;
+        </li>
+        <li>a second model family, to make sure this isn't a quirk of one model.</li>
+      </ul>
+      <p>
+        The key comparisons and how they'll be judged are written down before the results come in,
+        so the paper can't quietly pick whichever comparison looks best.
       </p>
     </section>
 
