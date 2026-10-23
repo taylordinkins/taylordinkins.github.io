@@ -95,19 +95,23 @@
       analyst only has time to review a few dozen prompts.
     </p>
 
+    <p>
+      <b>Disclaimer:</b> Generative AI (Claude) was used to assist the collation and presentation of the results here. 
+    </p>
+
     <section>
-      <h2>Novelty isn't malice</h2>
+      <h2>Novelty isn't always malice</h2>
       <p>
-        The natural way to catch new attacks is to flag whatever looks unusual and have an analyst
-        check it. That assumes attacks are the unusual prompts. In realistic traffic they mostly
+        A common way to identify anomalies interactively is to flag the most unusual looking instance based on some scoring measure and have an analyst check it.
+        Here, that assumes attacks are the most unusual prompts. In my benchmarks for realistic traffic, it looks like they mostly
         aren't.
       </p>
       <p>
-        When I looked at the 50 prompts a standard novelty detector ranks as most unusual, about 45
+        When I looked at 50 prompts a standard unsupervised novelty detector ranked as most &ldquo;unusual&rdquo;, about 45
         were ordinary chat: requests where the user forgot to paste in the text they wanted edited,
-        pasted code and error logs, and the same template sent over and over. None were attacks.
+        pasted code and error logs, and the same template sent over and over. None of these were attacks.
         The attacks didn't stand out at all: the typical one ranked near the middle of the benign
-        prompts, and at most 4% of any kind of attack made it into the top 5% a detector would
+        prompts on the score, and at most 4% of any kind of attack made it into the top 5% this detector would
         flag.
       </p>
 
@@ -115,20 +119,19 @@
         <picture>
           <source srcset="img/jb-novelty-dark.png" media="(prefers-color-scheme: dark)">
           <img src="img/jb-novelty-light.png" width="1360" height="720"
-               alt="Left: a grid of the 50 most unusual prompts in a pool, 45 everyday chat, 5 other benign prompts and 0 attacks. Right: the typical attack ranks at the 46th, 47th and 65th percentile of unusualness for three kinds of jailbreak, with 0.7%, 0% and 4% of each kind landing in the top 5%.">
+               alt="Left: a grid of the 50 most unusual prompts in a pool, 45 everyday chat, 5 other benign prompts and 0 attacks. Right: the typical attack ranks at the 46th, 47th and 65th percentile of the score for three kinds of jailbreak, with 0.7%, 0% and 4% of each kind landing in the top 5%.">
         </picture>
         <figcaption>
-          Left: what a novelty detector ranks highest, averaged over three data pools (44&ndash;47
+          Left: what a detector ranks highest, averaged over three data pools (44&ndash;47
           of the 50 were everyday chat in each). Right: where attacks rank by the same detector's
           score, measured against the pool's benign prompts.
         </figcaption>
       </figure>
 
       <p>
-        So a detector that flags whatever looks rare will spend its labels on prompts like these,
-        and with a small budget it may never show the analyst an attack at all. The question I'm
-        working on is how to choose which prompts to label, so that a detector reading the model's
-        internal activations learns what attacks look like rather than what rare prompts look like.
+        A detector that flags whatever looks rare will spend its labels on prompts like these,
+        and with a small budget it may never show the analyst an attack at all. Often, the first anomaly (or attack) found is needed to inform the detector generally what (some) types of anomalies look like. So, part of what I'm working on is how to choose which prompts to label, so that a detector reading the LLM's
+        internal activations learns what attacks look like rather than what rare prompts look like, and what form the detector should take to incorporate the labeled feedback. 
       </p>
     </section>
 
@@ -142,10 +145,9 @@
         attack types and benign topics it never saw during labeling.
       </p>
       <p>
-        The approach I'm testing is deliberately simple: a small detector that learns from every
+        The approach I'm testing is designed to be simple: a small detector that learns from every
         label, plus a rule for which prompt to show the analyst next. Neither piece is new on its
-        own; the labeling rule builds on established ideas from active learning. What I'm after is
-        when this works, why novelty-based methods fail where it succeeds, and how far it holds up.
+        own. The query rule builds on established ideas from active learning, which some existing work has suggested strictly greedy queries are best under a limited budget. What I'm investigating is specific to LLM's: when this works, why existing methods (including my work PMA) fail where this small detector succeeds, and how far it holds up on varied benchmarks.
       </p>
     </section>
 
@@ -156,7 +158,7 @@
         The novelty-based detectors, including PMA from my
         <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
         zero attacks in every run. They spent the whole budget on unusual benign prompts, which is
-        exactly the failure shown above. My approach found about twice as many attacks as active
+        exactly the failure shown above. This simple, small detector approach found about twice as many attacks as active
         anomaly discovery, the strongest baseline here.
       </p>
 
@@ -170,7 +172,7 @@
       </figure>
 
       <p>
-        Those labels are what the detector learns from, so finding attacks early carries over to the
+        Those labels are what the detector learns from, so finding attacks early usually carries over to the
         held-out set. After 50 labels, my approach reaches an AUPRC of 0.40, against 0.23&ndash;0.24
         for active anomaly discovery and for a detector trained on randomly chosen labels, and 0.14
         for a recent detector built on sparse-autoencoder features.
@@ -196,10 +198,10 @@
         discovery both beat my approach. About one run in six still finds no attack in its 50
         labels, and at very low attack rates (1 in 200 prompts) discovery falls apart. The failure
         of novelty is also specific to realistic traffic: in pools without everyday chat, PMA does
-        well and even comes out ahead of my approach.
+        well and even comes out ahead of this approach.
       </p>
       <p>
-        False alarms cut both ways. On new benign topics my approach flags about 4% of prompts,
+        False alarms are inconclusive. On new benign topics my approach flags about 4% of prompts,
         compared with about 10% for the distance-based detectors, but it flags about 7% of benign
         prompts that are phrased like attacks, where those detectors flag almost none. The detector
         partly learns &ldquo;sounds adversarial,&rdquo; not just &ldquo;is harmful.&rdquo;
@@ -207,15 +209,14 @@
       <p>
         These numbers also come from a setting where the defender starts with no labeled examples.
         A detector built from public labeled data is a strong starting point on its own, so I'm also
-        testing whether analyst feedback still adds on top of one.
+        testing whether analyst feedback still benefits when used on top of one.
       </p>
     </section>
 
     <section>
-      <h2>What's next</h2>
+      <h2>In progress</h2>
       <p>
-        I'm now running a much broader benchmark ahead of a workshop paper. Compared with the results
-        above, it uses ten fresh data pools and adds:
+        I'm now running a much broader benchmark. It uses ten additional data pools and adds:
       </p>
       <ul class="findings">
         <li>
@@ -227,20 +228,22 @@
           conversations get flagged as threats;
         </li>
         <li>
-          attack rates from 0.5% to 5%, and a check of whether the model actually answered each
+          attack rates in the range from 0.5% to 5%, and a check of whether the model actually responded to each
           attack it was sent;
         </li>
-        <li>a second model family, to make sure this isn't a quirk of one model.</li>
+        <li>a second model family</li>
       </ul>
       <p>
-        The key comparisons and how they'll be judged are written down before the results come in,
-        so the paper can't quietly pick whichever comparison looks best.
+        Lastly, PMA has some failure cases we tried to address in our paper with PMA-MGE, our version that used a mixture of Gaussians to try to work 
+        better on multi-modal data. Initially, this doesn't seem sufficient to handle LLM representations so far. Fully-supervised linear probes seem to perform fairly well on 
+        class separation for attacks vs benign prompts in existing literature, so it isn't necessarily a representation issue, but rather how PMA defines anomalies and how it incorporates 
+        nominal points. I'm looking into a redesign specific to this use-case that will be informed by these future findings.  
       </p>
     </section>
 
     <div class="status">
       <p>
-        These results are preliminary and come from my own benchmark. Code and details are available
+        These results are preliminary and come from my own benchmark. Code and details may be available
         on request: <a href="mailto:txdinkins@gmail.com">txdinkins@gmail.com</a>.
       </p>
     </div>
