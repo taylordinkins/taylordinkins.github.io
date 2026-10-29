@@ -252,14 +252,14 @@
         <li>attack rates from 0.5% to 5% (planned), and access to a second model family.</li>
       </ul>
 
-      <h3>First analysis: what a novelty detector flags</h3>
+      <h3>First analysis: what a novelty detector flags (sanity check)</h3>
       <p>
         Across the ten new pools, chat on topics the detector never saw, or from later months, is
         flagged no more often than familiar chat, and all three are flagged far more than curated
         benign prompts. So the false alarms come from unusual benign traffic, not from new topics themselves.
         On the attack side, plain harmful requests and automatically optimized attacks stand out,
         but jailbreaks are flagged no more often than everyday chat, and most far less. Those are the
-        attacks an analyst most needs help finding. Intuitively this makes sense as jailbreaks are specifically designed to get around model safeguards and force the model to comply. So it seems likely, as some existing work has suggested, that for obvious attacks we can catch the model refusal along with the attack itself. 
+        attacks an analyst most needs help finding. Obviously this intuitively makes sense as jailbreaks are specifically designed to get around model safeguards and get the model to comply. So it seems likely, as some existing work has suggested, that for obvious attacks we can catch the model refusal along with the attack itself. 
         For carefully engineered jailbreak attempts, I'm hoping we can arrive at feedback methods that are sufficient to detect them early and accurately. 
       </p>
 
