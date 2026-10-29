@@ -47,6 +47,12 @@
       line-height: 1.2;
     }
     h1 { font-size: 2rem; margin: 18px 0 8px; }
+    h3 {
+      font-family: "Source Serif 4", Georgia, serif;
+      font-weight: 600;
+      font-size: 1.08rem;
+      margin: 30px 0 8px;
+    }
     h2 {
       font-size: 1.3rem;
       margin: 44px 0 14px;
@@ -122,12 +128,13 @@
         realistic traffic, they mostly aren't.
       </p>
       <p>
-        In my first data pools, every attack was a jailbreak wrapped around a harmful request. Of the
-        50 prompts a standard unsupervised novelty detector ranked as most unusual, about 45 were
-        ordinary chat: requests where the user forgot to paste in the text they wanted edited, pasted
-        code and error logs, and the same template sent over and over. None were attacks. The attacks
-        didn't stand out at all: the typical one ranked near the middle of the benign prompts, and at
-        most 4% of any kind of attack made it into the top 5% this detector would flag.
+        In the three development pools used for my initial runs (below), every attack was a jailbreak
+        wrapped around a harmful request. Of the 50 prompts a standard unsupervised novelty detector
+        ranked as most unusual, about 45 were ordinary chat: requests where the user forgot to paste
+        in the text they wanted edited, pasted code and error logs, and the same template sent over
+        and over. None were attacks. The attacks didn't stand out at all: the typical one ranked near
+        the middle of the benign prompts, and at most 4% of any kind of attack made it into the top 5%
+        this detector would flag.
       </p>
 
       <figure>
@@ -137,34 +144,16 @@
                alt="Left: a grid of the 50 most unusual prompts in a pool, 45 everyday chat, 5 other benign prompts and 0 attacks. Right: the typical attack ranks at the 46th, 47th and 65th percentile of the score for three kinds of jailbreak, with 0.7%, 0% and 4% of each kind landing in the top 5%.">
         </picture>
         <figcaption>
-          Left: what a detector ranks highest, averaged over the three development pools (44&ndash;47
-          of the 50 were everyday chat in each). Right: where attacks rank by the same detector's
-          score, measured against the pool's benign prompts.
+          Development pools. Left: what a detector ranks highest, averaged over the three pools
+          (44&ndash;47 of the 50 were everyday chat in each). Right: where attacks rank by the same
+          detector's score, measured against the pool's benign prompts.
         </figcaption>
       </figure>
 
       <p>
-        A broader benchmark of ten new pools (described below) sharpens the picture. What gets
-        flagged is unusual benign traffic rather than new benign topics: chat on topics the detector
-        never saw, or from later months, is flagged no more often than familiar chat, and all three
-        are flagged far more than curated benign prompts. The attacks split too. Plain harmful
-        requests and automatically optimized attacks stand out, but jailbreaks are flagged no more
-        often than everyday chat, and most far less. Those are the attacks an analyst most needs
-        help finding.
+        The broader benchmark I'm running now refines this (see &ldquo;Current work&rdquo; below): what
+        gets flagged is unusual benign traffic, not benign prompts on new topics.
       </p>
-
-      <figure>
-        <picture>
-          <source srcset="img/jb-flagged-dark.png" media="(prefers-color-scheme: dark)">
-          <img src="img/jb-flagged-light.png" width="1360" height="860"
-               alt="Bar chart of the share of each group a novelty detector flags, at a threshold that flags 5% of familiar benign prompts. Benign: everyday chat on familiar topics 9.4%, on topics never seen 7.4%, from later months 8.5%; curated benign requests 1.0%; benign prompts phrased like attacks 0.2%; harmless prompts that sound harmful 0.4%. Attacks: jailbreaks in styles seen while labeling 0.5%, in a style never seen 0.8%, written by an attacker LLM 9.3%; plain harmful requests 32%; automatically optimized attacks 65%.">
-        </picture>
-        <figcaption>
-          Share of each group flagged at a threshold that flags 5% of familiar benign prompts
-          (everyday chat and curated requests together), averaged over the ten new pools. Preliminary.
-        </figcaption>
-      </figure>
-
       <p>
         A detector that flags whatever looks rare will spend its labels on prompts like these, and
         with a small budget it may never show the analyst a single attack. Yet the first attack found
@@ -176,14 +165,19 @@
     </section>
 
     <section>
-      <h2>Setup</h2>
+      <h2>Initial runs: three development pools</h2>
       <p>
-        In the first round of experiments, I hid a small fraction of jailbreak attempts (2%) in three
-        development pools of thousands of mostly ordinary prompts, and gave each method the same
-        budget of 50 labels from a simulated analyst. Each detector reads an open-weight LLM's
-        internal activations for every prompt, before the model responds. I then score it on a
-        separate held-out set that includes attack types and benign topics it never saw during
-        labeling.
+        I used these runs to develop the approach and fix its design. Their numbers are now being
+        re-tested on the broader benchmark, so treat them as early evidence.
+      </p>
+
+      <h3>Setup</h3>
+      <p>
+        I hid a small fraction of jailbreak attempts (2%) in three pools of thousands of mostly
+        ordinary prompts, and gave each method the same budget of 50 labels from a simulated analyst.
+        Each detector reads an open-weight LLM's internal activations for every prompt, before the
+        model responds. I then score it on a separate held-out set that includes attack types and
+        benign topics it never saw during labeling.
       </p>
       <p>
         The approach I'm testing is deliberately simple: a small detector that learns from every
@@ -192,16 +186,14 @@
         specific to LLMs: when this works, why existing interactive methods (including my own, PMA)
         fail where it succeeds, and how far it holds up across varied benchmarks.
       </p>
-    </section>
 
-    <section>
-      <h2>Results so far</h2>
+      <h3>Results</h3>
       <p>
-        These results come from the three development pools. The first thing to check is whether a
-        method puts attacks in front of the analyst at all. The novelty-based detectors, including PMA
-        from my <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>,
-        found zero attacks in every run. They spent the whole budget on unusual benign prompts, which
-        is exactly the failure shown above. My approach found about twice as many attacks as active
+        The first thing to check is whether a method puts attacks in front of the analyst at all. The
+        novelty-based detectors, including PMA from my
+        <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
+        zero attacks in every run. They spent the whole budget on unusual benign prompts, which is
+        exactly the failure shown above. My approach found about twice as many attacks as active
         anomaly discovery, the strongest baseline here.
       </p>
 
@@ -211,7 +203,7 @@
           <img src="img/jb-found-light.png" width="1360" height="780"
                alt="Line chart of attacks found while labeling, from 0 to 50 labels. My approach reaches about 12 attacks, active anomaly discovery about 6, random labeling about 1, and novelty-based detectors 0.">
         </picture>
-        <figcaption>Attacks found among the prompts sent to the analyst.</figcaption>
+        <figcaption>Development pools. Attacks found among the prompts sent to the analyst.</figcaption>
       </figure>
 
       <p>
@@ -228,56 +220,82 @@
                alt="Line chart of held-out AUPRC from 0 to 50 labels. At 50 labels: my approach 0.40, random labeling 0.24, active anomaly discovery 0.23, SAE-based detector 0.14, novelty-based detectors 0.05.">
         </picture>
         <figcaption>
-          AUPRC on held-out prompts. Both charts average three data pools with five seeds each (one run
-          per pool for the novelty-based detectors, which are deterministic). The two novelty-based
-          detectors give the same results and share a line.
+          Development pools. AUPRC on held-out prompts. Both charts average three pools with five
+          seeds each (one run per pool for the novelty-based detectors, which are deterministic). The
+          two novelty-based detectors give the same results and share a line.
         </figcaption>
       </figure>
 
       <p>
-        These numbers assume the defender starts with no labeled examples. A detector built from
-        public labeled data is a strong starting point on its own, and early runs suggest that analyst
-        feedback adds to it rather than being made redundant by it.
+        These numbers assume the defender starts with no labeled examples. In practice, a defender can
+        also build a simple detector from public labeled data (about 2,000 prompts here), and on its
+        own that reaches an AUPRC of 0.56 on the same held-out prompts. Using it as the starting point
+        and adding 50 analyst labels raises this to 0.70, and every run finds at least one attack. So
+        analyst feedback adds to a public starting point rather than being made redundant by it, and
+        the current work tests both settings.
       </p>
-    </section>
 
-    <section>
-      <h2>Caveats</h2>
+      <h3>Caveats</h3>
       <p>
         The gain isn't uniform: on one of the three pools, random labeling and active anomaly
-        discovery both beat my approach, and about one run in five finds no attack within 50 labels.
-        In early tests with closely related versions of the approach, discovery struggled at very low
-        attack rates (1 in 200 prompts), and PMA came out ahead in pools without everyday chat. False
-        alarms are mixed: on new benign topics my approach flags about 4% of prompts, against about
-        10% for distance-based detectors, but it flags about 7% of benign prompts phrased like attacks,
-        where those detectors flag almost none, so it partly learns &ldquo;sounds adversarial&rdquo;
-        rather than &ldquo;is harmful.&rdquo;
+        discovery both beat my approach, and without a public starting point about one run in five
+        finds no attack within 50 labels. In early tests with closely related versions of the
+        approach, discovery struggled at very low attack rates (1 in 200 prompts), and PMA came out
+        ahead in pools without everyday chat. False alarms are mixed: on new benign topics my approach
+        flags about 4% of prompts, against about 10% for distance-based detectors, but it flags about
+        7% of benign prompts phrased like attacks, where those detectors flag almost none, so it partly
+        learns &ldquo;sounds adversarial&rdquo; rather than &ldquo;is harmful.&rdquo;
       </p>
     </section>
 
     <section>
-      <h2>Since the last update</h2>
+      <h2>Current work: a broader benchmark</h2>
       <p>
-        Since mid-October, I've built the broader benchmark and started the confirmatory runs on it:
+        Since mid-October, I've built a broader benchmark to test the initial results at a larger
+        scale, and started the confirmatory runs on it. It adds:
       </p>
       <ul class="findings">
         <li>
-          ten new data pools, drawn after the approach was fixed on the development pools, with benign topics and later
-          months of traffic held out, and attack types the first pools lacked: plain harmful
-          requests, automatically optimized attacks, and real users' jailbreak attempts;
+          ten new data pools, drawn after the approach was fixed on the development pools, with benign
+          topics and later months of traffic held out, and attack types the first pools lacked: plain
+          harmful requests, automatically optimized attacks, and real users' jailbreak attempts;
         </li>
         <li>
           the model's responses to the test attacks, generated and automatically judged (hand checks
-          in progress), so detection can be split
-          by whether the model actually complied;
+          in progress), so detection can be split by whether the model actually complied;
         </li>
-        <li>attack rates from 0.5% to 5% planned, and access to a second model family.</li>
+        <li>attack rates from 0.5% to 5% (planned), and access to a second model family.</li>
       </ul>
+
+      <h3>First analysis: what a novelty detector flags</h3>
       <p>
-        Its first analysis is the second figure above. The main comparisons on the new pools are
-        starting now, with results expected in November and a preprint targeted for late December.
-        Whether this setting needs a new method, such as a version of PMA redesigned for LLM
-        activations, is a decision I'll make once those comparisons are in.
+        Across the ten new pools, chat on topics the detector never saw, or from later months, is
+        flagged no more often than familiar chat, and all three are flagged far more than curated
+        benign prompts. So the false alarms come from unusual benign traffic, not from new topics.
+        The attacks split too. Plain harmful requests and automatically optimized attacks stand out,
+        but jailbreaks are flagged no more often than everyday chat, and most far less. Those are the
+        attacks an analyst most needs help finding.
+      </p>
+
+      <figure>
+        <picture>
+          <source srcset="img/jb-flagged-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="img/jb-flagged-light.png" width="1360" height="860"
+               alt="Bar chart of the share of each group a novelty detector flags, at a threshold that flags 5% of familiar benign prompts. Benign: everyday chat on familiar topics 9.4%, on topics never seen 7.4%, from later months 8.5%; curated benign requests 1.0%; benign prompts phrased like attacks 0.2%; harmless prompts that sound harmful 0.4%. Attacks: jailbreaks in styles seen while labeling 0.5%, in a style never seen 0.8%, written by an attacker LLM 9.3%; plain harmful requests 32%; automatically optimized attacks 65%.">
+        </picture>
+        <figcaption>
+          Broader benchmark, preliminary. Share of each group flagged at a threshold that flags 5% of
+          familiar benign prompts (everyday chat and curated requests together), averaged over the ten
+          new pools.
+        </figcaption>
+      </figure>
+
+      <h3>Next</h3>
+      <p>
+        The main comparisons on the new pools, with and without a public starting point, are starting
+        now, with results expected in November and a preprint targeted for late December. Whether this
+        setting needs a new method, such as a version of PMA redesigned for LLM activations, is a
+        decision I'll make once those comparisons are in.
       </p>
     </section>
 
