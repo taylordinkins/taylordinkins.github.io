@@ -106,26 +106,11 @@
     </p>
 
     <section>
-      <h2>Why this matters</h2>
-      <p>
-        Some deployed misuse monitors read a model's internal activations, using probes trained on
-        labeled examples of misuse. That works once you know what an attack looks like. When a new
-        attack style shows up in live traffic, someone first has to find examples of it, usually a
-        small team that can review only a tiny fraction of prompts. This project asks how to spend
-        that review budget so the attacks it turns up can train a detector or feed a rapid response.
-        The individual pieces are well studied, and I build on them. But in a survey of the related
-        work, I haven't found a study that combines all of them: a small analyst budget, a choice of
-        which prompts to review, a detector reading activations, jailbreaks as the target, and a pool
-        dominated by everyday chat.
-      </p>
-    </section>
-
-    <section>
       <h2>Unusual isn't malicious</h2>
       <p>
         A common way to find anomalies interactively is to have an analyst check whatever a scoring
         measure ranks as most unusual. Here, that assumes attacks are the most unusual prompts. In
-        realistic traffic, they mostly aren't.
+        realistic traffic, it seems mostly aren't.
       </p>
       <p>
         In the three development pools used for my initial runs (below), every attack was a jailbreak
@@ -152,14 +137,14 @@
 
       <p>
         The broader benchmark I'm running now refines this (see &ldquo;Current work&rdquo; below): what
-        gets flagged is unusual benign traffic, not benign prompts on new topics.
+        gets flagged is unusual benign traffic, not benign prompts on previously unseen topics.
       </p>
       <p>
         A detector that flags whatever looks rare will spend its labels on prompts like these, and
         with a small budget it may never show the analyst a single attack. Yet the first attack found
         is often what tells the detector what attacks look like at all. So the question I'm working on
-        is which prompts to label, so that a detector reading the LLM's internal activations learns
-        what attacks look like rather than what rare prompts look like, and what form that detector
+        is both which prompts to label, so that a detector reading the LLM's internal activations learns
+        what attacks look like rather than what atypical prompts look like, and what form that detector
         should take to make use of the analyst's feedback.
       </p>
     </section>
@@ -168,7 +153,7 @@
       <h2>Initial runs: three development pools</h2>
       <p>
         I used these runs to develop the approach and fix its design. Their numbers are now being
-        re-tested on the broader benchmark, so treat them as early evidence.
+        re-tested on the broader benchmark. These are early proof-of-concepts.
       </p>
 
       <h3>Setup</h3>
@@ -193,7 +178,7 @@
         novelty-based detectors, including PMA from my
         <a href="https://ieeexplore.ieee.org/abstract/document/11391824">own prior work</a>, found
         zero attacks in every run. They spent the whole budget on unusual benign prompts, which is
-        exactly the failure shown above. My approach found about twice as many attacks as active
+        exactly the failure shown above. A simple new approach found about twice as many attacks as active
         anomaly discovery, the strongest baseline here.
       </p>
 
@@ -210,7 +195,7 @@
         Those labels are what the detector learns from, so finding attacks early usually carries over
         to the held-out set. After 50 labels, my approach reaches an AUPRC of 0.40, against
         0.23&ndash;0.24 for active anomaly discovery and for a detector trained on randomly chosen
-        labels, and 0.14 for a recent detector built on sparse-autoencoder features.
+        labels, and 0.14 for a recent detector built on sparse autoencoder features. I'm also planning to investigate why the sparse autoencoder representation and method is performing below what I would have expected.
       </p>
 
       <figure>
@@ -251,8 +236,8 @@
     <section>
       <h2>Current work: a broader benchmark</h2>
       <p>
-        Since mid-October, I've built a broader benchmark to test the initial results at a larger
-        scale, and started the confirmatory runs on it. It adds:
+        Since mid-October, I've been building a broader benchmark to test the initial results at a larger
+        scale, and started some experiments on it. It adds:
       </p>
       <ul class="findings">
         <li>
@@ -271,10 +256,11 @@
       <p>
         Across the ten new pools, chat on topics the detector never saw, or from later months, is
         flagged no more often than familiar chat, and all three are flagged far more than curated
-        benign prompts. So the false alarms come from unusual benign traffic, not from new topics.
-        The attacks split too. Plain harmful requests and automatically optimized attacks stand out,
+        benign prompts. So the false alarms come from unusual benign traffic, not from new topics themselves.
+        On the attack side, plain harmful requests and automatically optimized attacks stand out,
         but jailbreaks are flagged no more often than everyday chat, and most far less. Those are the
-        attacks an analyst most needs help finding.
+        attacks an analyst most needs help finding. Intuitively this makes sense as jailbreaks are specifically designed to get around model safeguards and force the model to comply. So it seems likely, as some existing work has suggested, that for obvious attacks we can catch the model refusal along with the attack itself. 
+        For carefully engineered jailbreak attempts, I'm hoping we can arrive at feedback methods that are sufficient to detect them early and accurately. 
       </p>
 
       <figure>
@@ -292,10 +278,9 @@
 
       <h3>Next</h3>
       <p>
-        The main comparisons on the new pools, with and without a public starting point, are starting
-        now, with results expected in November and a preprint targeted for late December. Whether this
-        setting needs a new method, such as a version of PMA redesigned for LLM activations, is a
-        decision I'll make once those comparisons are in.
+        The main comparisons on the new pools, with and without a public starting point, are ongoing. Whether this
+        setting needs a new method, such as a version of PMA fully redesigned for LLM activations, is an open question. 
+        I expect the most difficult attack types will require deeper analysis into how the incremental feedback can help and what form this should take.
       </p>
     </section>
 
