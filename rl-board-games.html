@@ -98,10 +98,9 @@
     <p class="meta">Side project &middot; work in progress &middot; updated November 2026</p>
 
     <p class="lede">
-      I'm implementing modern strategy board games as environments that standard game-playing
-      algorithms can run on, then training reinforcement learning agents to play them. Board games
-      make a good testbed: the rules are exact, the objective is clear, and a strong opponent is
-      easy to measure against.
+      I'm implementing modern strategy board games as <a href="https://github.com/google-deepmind/open_spiel">OpenSpiel</a>
+      environments and training reinforcement learning agents to play them, with a small web UI so I can play
+      against what I train. More games will follow.
     </p>
 
     <p>
@@ -109,92 +108,40 @@
     </p>
 
     <section>
-      <h2>Overview</h2>
-      <p>
-        The approach is to write each game once as an <a href="https://github.com/google-deepmind/open_spiel">OpenSpiel</a>
-        game, so that search and RL algorithms can be pointed at it unchanged, and to build a small web
-        interface so I can play against what I train. I'll add more games over time; the first is
-        <em>The King is Dead</em>.
-      </p>
-    </section>
-
-    <section>
       <h2>The King is Dead</h2>
       <p>
         <a href="https://github.com/taylordinkins/kingisdead">github.com/taylordinkins/kingisdead</a>
       </p>
       <p>
-        <em>The King is Dead</em> (Peer Sylvester, Osprey Games) is a 2&ndash;4 player area-control
-        game about influence over the Scottish, Welsh and English factions after a succession crisis.
-        Players play cards to place and move followers between regions and to summon them to their own court, and the game
-        ends in either a coronation or an invasion, with a series of tiebreaks deciding close finishes.
-        All information is public. The implementation covers the
-        two- and three-player base game with a rules specification that every test cites, a browser UI for
-        human play, and three kinds of opponent: random, a hand-written heuristic, and Monte Carlo
-        tree search (MCTS) at several strengths.
+        A full two- and three-player implementation of the area-control game <em>The King is Dead</em>
+        (Peer Sylvester, Osprey Games), with a rules specification that every test cites, a browser UI,
+        and random, heuristic and MCTS opponents.
       </p>
 
-      <h3>The RL portion</h3>
-      <p>
-        Each turn is split into a sequence of small decisions (pick a card, then its targets, then a
-        follower to summon), which keeps the action space fixed at 40 actions and lets a single policy
-        network act on it with illegal moves masked out. Two self-play methods are implemented, each using a
-        small policy/value network (two hidden layers of 256 units) trained against itself:
-      </p>
+      <h3>Highlights: the RL agents</h3>
       <ul class="findings">
         <li>
-          <b>PPO self-play.</b> Mostly pure self-play, with a fifth of games against older snapshots, the
-          heuristic, or random play to keep training from drifting. After 90 minutes of training on CPU
-          workers, the policy beat the heuristic bot about two games in three, but lost to a 100-simulation
-          MCTS opponent more often than not (40&ndash;42% wins). It is very fast, though: roughly
-          0.0003 s per move, about 1,400 times faster than that MCTS opponent.
+          Turns are split into small sequential decisions, giving a fixed 40-action space that a single
+          masked policy/value network can act on.
         </li>
         <li>
-          <b>AlphaZero-style self-play.</b> A policy/value network guides tree search, and the search
-          results become the training targets for the next iteration. OpenSpiel's bundled AlphaZero
-          didn't fit this setup, so I wrote the loop on top of its Python MCTS. A 3-hour run
-          (about 22,000 self-play games) produced the strongest agent so far.
+          <b>PPO self-play</b> beat the heuristic bot about 2 games in 3 with no search, but lost to
+          100-simulation MCTS (40&ndash;42% wins).
+        </li>
+        <li>
+          <b>AlphaZero-style self-play</b> (network plus 50-simulation MCTS, trained on about 22,000
+          games) won about 0.87&ndash;0.90 against the heuristic and 0.79&ndash;0.87 against 100-simulation
+          MCTS. Search was essential: neither network was competitive with MCTS on its own.
         </li>
       </ul>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Agent (2 players)</th><th class="num">vs. heuristic</th><th class="num">vs. 100-sim MCTS</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>PPO policy (no search)</td><td class="num">0.67</td><td class="num">0.40&ndash;0.42</td></tr>
-            <tr><td>AlphaZero network + 50-sim MCTS</td><td class="num">0.87&ndash;0.90</td><td class="num">0.79&ndash;0.87</td></tr>
-          </tbody>
-        </table>
-      </div>
       <p class="caption">
-        Win rates over several hundred greedy games with seats rotated and ties shared. The AlphaZero
-        range spans an independent evaluation (300 and 100 games) and a separate tournament run
-        (200 and 100 games); the 95% intervals are roughly &plusmn;0.05&ndash;0.08, so the
-        MCTS comparisons in particular are imprecise.
-      </p>
-
-      <p>
-        One result I found interesting is that, for this game, search matters a lot: the
-        AlphaZero network used on its own (without tree search) was weak, and PPO without search never
-        caught up to MCTS, whereas the combination of network and search won clearly. The trained agent is
-        available as an opponent in the web UI.
-      </p>
-
-      <h3>Limitations and next steps</h3>
-      <p>
-        Everything above is two-player and measured against built-in bots, not human players. A three-player
-        agent, the four-player team variant, and the game's advanced variant with hidden information are
-        planned, and I haven't yet tested how well the agents do against people.
+        Two-player games only, evaluated against built-in bots over a few hundred games with seats rotated
+        (95% intervals roughly &plusmn;0.05&ndash;0.08). Three-player agents and testing against people are still to do.
       </p>
     </section>
 
     <div class="status">
-      <p>
-        This page is a short summary of work in progress and will be updated. Numbers are from my own
-        evaluations; reports and code are in the repository linked above.
-      </p>
+      <p>Work in progress; this page will be updated.</p>
     </div>
 
     <footer>
