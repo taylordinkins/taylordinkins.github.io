@@ -72,6 +72,10 @@
     th { color: var(--muted); font-weight: 500; font-size: 0.85rem; }
     td.num, th.num { text-align: right; padding-right: 0; padding-left: 12px; white-space: nowrap; }
     .caption { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+    figure { margin: 28px 0 0; }
+    figure img { display: block; width: 100%; height: auto; border-radius: 6px; }
+    figcaption { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+    code { font-size: 0.9em; }
     .status {
       background: var(--callout);
       border-left: 3px solid var(--accent);
@@ -140,12 +144,106 @@
       </p>
     </section>
 
+    <section>
+      <h2>Lignum</h2>
+      <p>
+        <a href="https://github.com/taylordinkins/lignum-openspiel">github.com/taylordinkins/lignum-openspiel</a>
+      </p>
+      <p>
+        <em>Lignum</em> (Alexander Huemer, Capstone Games) is a heavy economic game about running a
+        sawmill. Each round, players travel a supply path to hire workers and buy equipment, pick a forest
+        area to cut, then haul the wood home by river or wagon, saw it, dry it and either sell it or use it
+        to fill orders (tasks). Two winters must be survived with enough food and firewood, and the richest
+        player at the end wins. The implementation covers the second edition with the
+        <em>Joinery and Buildings</em> expansion for 2&ndash;4 players, with a browser UI, hotseat play and
+        several bots.
+      </p>
+
+      <figure>
+        <img src="img/lignum-board.png" width="1440" height="955" loading="lazy"
+             alt="The project's own flat illustrated Lignum board: six forest cutting areas around a river, a numbered supply path of 22 locations (bearers, fodder, woodcutters, buildings, tasks, joiner, sawyers, market), a phase track for the seasons and winter, and a planned-work schedule for two years.">
+        <figcaption>
+          The main board in the project's own artwork (the official art isn't included). Each player also has a
+          sawmill board for storage, sawing and three drying stages.
+        </figcaption>
+      </figure>
+
+      <p>
+        As an RL problem it is much harder than <em>The King is Dead</em>. A two-player game has
+        about 550 decisions, players' choice of cutting area is hidden until revealed, and the score is
+        each player's own money rather than a win or loss. Rewards are also delayed: wood cut in one season
+        may only pay off two rounds later, once it has dried enough to complete an order.
+      </p>
+
+      <h3>How the bots are doing</h3>
+      <p>
+        All numbers are two-player games on the expansion board, measured as the bot's average final
+        money against <code>heuristic-v6</code>, a hand-tuned baseline. An experienced human scores
+        about $60 or more.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Bot</th><th class="num">$ per game</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hand-tuned heuristics (v1&ndash;v7, against each other)</td><td class="num">~20</td></tr>
+            <tr><td>Strategist (scripted, plan-driven, no search)</td><td class="num">57&ndash;60</td></tr>
+            <tr><td>AlphaZero-style search</td><td class="num">69.4</td></tr>
+            <tr><td>Plan-level search + AlphaZero-style search</td><td class="num">72.5</td></tr>
+            <tr><td><em>Claude Opus, as a reference (1 game)</em></td><td class="num"><em>80</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        Standard error about $1 for the search bots (100 games on evaluation seeds not used in training);
+        the strategist figure is over 200&ndash;3,000 games. The plan-search result still needs confirming on
+        fresh seeds. The Opus result is a single game and only a
+        point of comparison.
+      </p>
+
+      <ul class="findings">
+        <li>
+          <b>Hand-tuning hit a ceiling.</b> Seven heuristic versions improved winter planning and wood flow,
+          but plateaued at about $20 a game. Several plausible changes (a task-first policy, a task
+          planner, a value function fitted to game data) made no difference or made things worse.
+        </li>
+        <li>
+          <b>Plain MCTS failed at first.</b> With random rollouts cut off at 15 moves in a 550-move game,
+          search won only 15% against the heuristic, and more simulations made it worse. Playing rollouts
+          out with the heuristic instead raised that to 76%.
+        </li>
+        <li>
+          <b>An LLM showed where the gap was.</b> Claude Opus played a game and scored $80. Comparing its
+          263 decisions with the heuristic's, it agreed on routine moves but not on strategic ones: it
+          chose orders whose wood needs overlapped, provisioned for winter early and built huts. Those ideas
+          went into the scripted strategist, which wins 93% of games against the heuristic.
+        </li>
+        <li>
+          <b>AlphaZero-style search on top.</b> A policy/value network is first trained to imitate the
+          strategist, then on games where the strategist's choice is occasionally swapped for an
+          alternative, so the value head learns what those alternatives are worth. Search runs only at
+          strategic decisions, with the strategist handling routine wood handling. Almost all of the gain
+          over the strategist comes from completing more orders. Adding a search over whole-round plans
+          brings it to $72.5.
+        </li>
+      </ul>
+
+      <p>
+        Training so far is small: about 6 GPU-minutes and one self-play iteration, which did not improve
+        the score, because the search still assumes the strategist plays the rest of the game. Next steps are
+        plans that commit to several orders across rounds, and policy-gradient fine-tuning of the network so
+        it can eventually replace the strategist inside the search.
+      </p>
+    </section>
+
     <div class="status">
       <p>Work in progress; this page will be updated.</p>
     </div>
 
     <footer>
-      Last updated November 2, 2026
+      Last updated November 12, 2026
     </footer>
 
   </main>
