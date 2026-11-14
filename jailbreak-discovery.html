@@ -283,6 +283,29 @@
         I expect the most difficult attack types will require deeper analysis into how the incremental feedback can help and what form this should take.
       </p>
     </section>
+    <section>
+      <h2>Limited findings & current shape</h2>
+      <p>
+        Main takeaway: wider benchmarks show a different picture than I originally planned. Rescoping is in progress.
+      </p>
+      <ul class="findings">
+        <li>
+          reinforced: wrapped jailbreaks tend to cluster and look even more like "typical use" than benign outliers
+        </li>
+        <li>
+          mixing plain harmful attacks makes novelty-based detection easy! - but only for harmful prompts (some engineered attacks still show up this, but may be engineered for older open-weight models) - wrapped jailbreaks are missed
+        </li>
+        <li>
+          analyst labeling exacerbates the above greedy effect on "multimodal" harmful prompts - you just pick out the easy ones and forget to learn
+        </li>
+      </ul>
+      <h3>What now?</h3>
+      <p>
+        I'm limiting the scope to wrapped attacks only - they're what we care about the most and are hardest to find without some prior knowledge or labels. I'm also moving more to algorithm redesign on PMA. 
+        This opens up more issues with feedback-based anomaly detection without being able to query batches. Uncertainty-based sampling is great if you have a large enough budget and/or the ability to select multiple queries.
+        For now, I'm still assuming we go one-by-one, which somewhat seems like greedy might not work in this case if you can't find representatives for the wrapped attacks (see: active anomaly discovery). Stay tuned.
+      </p>
+    </section>
 
     <div class="status">
       <p>
@@ -292,7 +315,7 @@
     </div>
 
     <footer>
-      Last updated October 29, 2026
+      Last updated November 13, 2026
     </footer>
 
   </main>
