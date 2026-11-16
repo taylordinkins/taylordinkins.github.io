@@ -110,10 +110,10 @@
       <p>
         A common way to find anomalies interactively is to have an analyst check whatever a scoring
         measure ranks as most unusual. Here, that assumes attacks are the most unusual prompts. In
-        realistic traffic, it seems mostly aren't.
+        realistic traffic, this doesn't hold up for many attacks.
       </p>
       <p>
-        In the three development pools used for my initial runs (below), every attack was a jailbreak
+        In the three development pools used for my initial runs (below - sanity check), every attack was a jailbreak
         wrapped around a harmful request. Of the 50 prompts a standard unsupervised novelty detector
         ranked as most unusual, about 45 were ordinary chat: requests where the user forgot to paste
         in the text they wanted edited, pasted code and error logs, and the same template sent over
@@ -146,6 +146,12 @@
         is both which prompts to label, so that a detector reading the LLM's internal activations learns
         what attacks look like rather than what atypical prompts look like, and what form that detector
         should take to make use of the analyst's feedback.
+      </p>
+
+      <p>
+        There also exist many types of jailbreaks, and it's a big open question whether a limited budget is enough 
+        to flag a majority, and how alike each type looks. Supervised approaches seem to suggest linear
+        separability, but it's harder when you assume far less samples. 
       </p>
     </section>
 
@@ -296,12 +302,12 @@
           mixing plain harmful attacks makes novelty-based detection easy! - but only for harmful prompts (some engineered attacks still show up this, but may be engineered for older open-weight models) - wrapped jailbreaks are missed
         </li>
         <li>
-          analyst labeling exacerbates the above greedy effect on "multimodal" harmful prompts - you just pick out the easy ones and forget to learn
+          analyst labeling exacerbates the above greedy effect on "multimodal" harmful prompts - you just pick out the easy ones which doesn't help the learning process
         </li>
       </ul>
       <h3>What now?</h3>
       <p>
-        I'm limiting the scope to wrapped attacks only - they're what we care about the most and are hardest to find without some prior knowledge or labels. I'm also moving more to algorithm redesign on PMA. 
+        I'm limiting the scope to wrapped attacks only for now - they seem hardest to find without some prior knowledge or labels. I'm also moving more to algorithm redesign on PMA. 
         This opens up more issues with feedback-based anomaly detection without being able to query batches. Uncertainty-based sampling is great if you have a large enough budget and/or the ability to select multiple queries.
         For now, I'm still assuming we go one-by-one, which somewhat seems like greedy might not work in this case if you can't find representatives for the wrapped attacks (see: active anomaly discovery). Stay tuned.
       </p>
