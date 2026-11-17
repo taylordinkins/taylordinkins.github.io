@@ -238,12 +238,89 @@
       </p>
     </section>
 
+    <section>
+      <h2>Bus</h2>
+      <p>
+        <a href="https://github.com/taylordinkins/Bus-openspiel">github.com/taylordinkins/Bus-openspiel</a>
+      </p>
+      <p>
+        <em>Bus</em> (Jeroen Doumen and Joris Wiersinga, Splotter Spellen) is a tight, highly interactive
+        network game for 3&ndash;5 players. Each round, players take turns placing a limited supply of
+        action markers on one shared action board, then the actions resolve in a fixed order: extend your
+        bus line, add buses, bring passengers into the train stations, put up new buildings, turn the
+        clock that decides whether passengers want to go home, to work or to the pub, and finally drive
+        them there for points. Every space you take is one another player can't, and how strong an action
+        is depends on how early you claimed it and on how many buses the leading player has. The
+        implementation covers the Complete Edition rules for 3&ndash;5 players, with a browser UI,
+        hotseat play and several bots.
+      </p>
+
+      <figure>
+        <img src="img/bus-board.webp" width="1440" height="900" loading="lazy"
+             alt="The project's web UI for Bus: a city map of intersections and streets with lettered construction sites, two train stations, houses, offices and pubs, and four players' coloured bus lines; below it the action board (lines, buses, passengers, buildings, clock, Vrrooomm!, starting player) and the time stones; on the right the players' panels and the action log.">
+        <figcaption>
+          The game in the project's web UI, drawn on the
+          <a href="https://boardgamegeek.com/filepage/133467/bus-rethemed-board">rethemed board</a>
+          by Andy Mesa and Umberto Costa. Original game by Splotter Spellen.
+        </figcaption>
+      </figure>
+
+      <p>
+        Much more of <em>Bus</em> is shared than in the other two games: the action board, the
+        passengers, the buildings and even the streets, since bus lines can run alongside each other. The value of nearly every decision depends on what the other players
+        do with it that round, which makes a policy harder to optimise and also makes it harder to
+        write a strong hand-crafted heuristic to train and evaluate against.
+      </p>
+
+      <h3>How the bots are doing</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Bot (four-player games)</th><th>Opponents</th><th class="num">Win rate</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Heuristic (hand-written, greedy)</td><td>3 random</td><td class="num">73%</td></tr>
+            <tr><td>MCTS, 200 simulations</td><td>3 random</td><td class="num">95%</td></tr>
+            <tr><td>MCTS, 200 simulations</td><td>3 heuristic</td><td class="num">34%</td></tr>
+            <tr><td>PPO self-play, 20-minute run</td><td>3 heuristic</td><td class="num">93%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">
+        One bot against three copies of the opponent, seats rotated, so 25% is an even share.
+        100&ndash;200 games per row (95% intervals roughly &plusmn;0.05&ndash;0.09).
+      </p>
+
+      <ul class="findings">
+        <li>
+          <b>Search alone barely beats the heuristic.</b> MCTS with random rollouts crushes random play
+          but wins only about a third of games against three heuristic bots, just above an even share.
+        </li>
+        <li>
+          <b>PPO from scratch learns quickly.</b> With no imitation learning, a 20-minute self-play run
+          on 8 CPU workers (about 54,000 games against itself, past snapshots and the built-in bots)
+          wins 93% of games against three heuristic bots.
+        </li>
+        <li>
+          <b>Search on top of the network hasn't paid off yet.</b> Using that network as the prior and
+          value inside MCTS won slightly more often against the heuristic (95% vs 90%), but did no better
+          than the network itself when the two played each other.
+        </li>
+      </ul>
+
+      <p>
+        In progress: a longer league-training run (mixed 3-, 4- and 5-player games, a hall of fame of
+        past snapshots that new versions must keep beating) and work on reward shaping, currently a
+        blend of win/loss and score margin that is annealed to pure win/loss.
+      </p>
+    </section>
+
     <div class="status">
       <p>Work in progress; this page will be updated.</p>
     </div>
 
     <footer>
-      Last updated November 12, 2026
+      Last updated November 17, 2026
     </footer>
 
   </main>
